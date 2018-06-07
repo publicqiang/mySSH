@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tool http://www.springframework.org/schema/tool/spring-tool.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+    <!--配置数据源 c3p0-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="oracle.jdbc.driver.OracleDriver"/>
+        <property name="jdbcUrl" value="jdbc:oracle:thin:@localhost:1521:orcl"/>
+        <property name="user" value="bocc"/>
+        <property name="password" value="boccpass"/>
+        <property name="minPoolSize" value="2"/>
+        <property name="maxPoolSize" value="40"/>
+        <property name="initialPoolSize" value="2"/>
+        <property name="maxIdleTime" value="30"/>
+    </bean>
+
+    <!--配置数据源 -->
+    <!--<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">-->
+        <!--<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>-->
+        <!--<property name="url" value="jdbc:oracle:thin:@localhost:1521:orcl"/>-->
+        <!--<property name="username" value="bocc"/>-->
+        <!--<property name="password" value="boccpass"/>-->
+    <!--</bean>-->
+
+    <!-- 定义Hibernate的SessionFactory，SessionFactory需要依赖数据源，注入dataSource -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 定义Hibernate SessionFactory的属性 -->
+        <property name="hibernateProperties">
+            <props>
+                <!-- 指定Hibernate的连接方言 -->
+                <prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop>
+                <!--是否根据Hibernate映射创建数据表 -->
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.connection.url">jdbc:oracle:thin:@localhost:1521:orcl</prop>
+                <prop key="hibernate.connection.driver_class">oracle.jdbc.OracleDriver</prop>
+            </props>
+        </property>
+        <!-- 依赖注入映射文件，扫描包-->
+        <property name="packagesToScan" value="com.mySSH"/>
+    </bean>
+
+    <!-- 配置Hibernate的局部事务管理器，使用HibernateTransactionManager类 -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!--事务-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans>
